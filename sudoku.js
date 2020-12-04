@@ -21,6 +21,7 @@ class Sudoku {
 
       return grid;
     } catch (e) {
+      // console.error(e);
       this.grid = null;
 
       return null;
@@ -43,7 +44,7 @@ class Sudoku {
   _fetchNewPuzzle = async () => {
     const { data: response } = await axios.get(BASE_URL);
 
-    return response.data.squares;
+    return response.squares;
   };
 
   move = ({ x, y, value }) => {

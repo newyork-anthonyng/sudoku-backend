@@ -12,11 +12,9 @@ const handlers = [
   rest.get(BASE_URL, (_, res, ctx) => {
     return res(
       ctx.json({
-        data: {
-          response: true,
-          size: 9,
-          squares: [{ x: 0, y: 0, value: 9 }],
-        },
+        response: true,
+        size: 9,
+        squares: [{ x: 0, y: 0, value: 9 }],
       })
     );
   }),
