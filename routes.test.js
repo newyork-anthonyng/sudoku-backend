@@ -3,6 +3,7 @@ const express = require("express");
 const app = express();
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
+app.use(express.json());
 
 jest.mock("./sudoku", () => {
   class MockSudoku {
@@ -11,7 +12,7 @@ jest.mock("./sudoku", () => {
       for (let i = 0; i < emptyGrid.length; i++) {
         emptyGrid[i] = [];
         for (let j = 0; j < emptyGrid.length; j++) {
-          emptyGrid[i][j] = { x: i, y: j, value: 0, filled: true };
+          emptyGrid[i][j] = { x: i, y: j, value: 0, filled: false };
         }
       }
 
@@ -19,6 +20,17 @@ jest.mock("./sudoku", () => {
     };
 
     getGrid = () => this.grid;
+
+    move = ({ x, y, value }) => {
+      const originalSquare = this.grid[x][y];
+
+      const newSquare = {
+        ...originalSquare,
+        value,
+      };
+
+      this.grid[x][y] = newSquare;
+    };
   }
 
   return MockSudoku;
@@ -68,4 +80,44 @@ describe("GET /:gameId", () => {
   });
 });
 
-// TODO: put /:gameId
+describe("PUT /:gameId", () => {
+  const move = {
+    x: 0,
+    y: 0,
+    value: 9,
+  };
+
+  it("should update game id", async () => {
+    let gameToken;
+    await request(app)
+      .get("/new")
+      .then((response) => {
+        gameToken = response.body.id;
+      });
+
+    await request(app)
+      .put(`/${gameToken}`)
+      .set("Content-Type", "application/json")
+      .send(JSON.stringify(move))
+      .expect(200);
+
+    await request(app)
+      .get(`/${gameToken}`)
+      .then((response) => {
+        const { grid } = response.body;
+        const square = grid[move.x][move.y];
+
+        expect(square.value).toEqual(move.value);
+      });
+  });
+
+  it("should return 404 when game is not found", async () => {
+    let gameToken = "does-not-exist";
+
+    await request(app)
+      .put(`/${gameToken}`)
+      .set("Content-Type", "application/json")
+      .send(JSON.stringify(move))
+      .expect(404);
+  });
+});

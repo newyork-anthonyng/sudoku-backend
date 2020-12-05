@@ -4,6 +4,8 @@ const cookieParser = require("cookie-parser");
 const routes = require("./routes");
 
 app.use(cookieParser());
+app.use(express.json());
+
 app.use("/games", routes);
 
 const port = process.env.PORT || 3000;

@@ -35,4 +35,19 @@ router.get("/:gameId", (req, res) => {
   return res.json({ grid: grid });
 });
 
+router.put("/:gameId", (req, res) => {
+  const { gameId } = req.params;
+  const { x, y, value } = req.body;
+
+  const sudoku = games[gameId];
+
+  if (!sudoku) {
+    return res.sendStatus(404);
+  }
+
+  sudoku.move({ x, y, value });
+
+  return res.json({ ok: true });
+});
+
 module.exports = router;
