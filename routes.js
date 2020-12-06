@@ -3,51 +3,56 @@ const router = express.Router();
 
 const Haikunator = require("haikunator");
 
-const Sudoku = require("./sudoku");
-
-const games = {};
-
 function getRandomToken() {
   const haiku = new Haikunator();
 
   return haiku.haikunate({ tokenLength: 0 });
 }
 
-router.get("/new", async (req, res) => {
-  const token = getRandomToken();
-  const newSudoku = new Sudoku();
-  games[token] = newSudoku;
-  newSudoku.createNewPuzzle();
+const Sudoku = require("./sudoku");
 
-  res.cookie("sudoku_game_id", token, { maxAge: 900000, httpOnly: true });
-  return res.json({ id: token });
-});
+function myFunc(io) {
+  const games = {};
 
-router.get("/:gameId", (req, res) => {
-  const { gameId } = req.params;
-  const sudoku = games[gameId];
-  if (!sudoku) {
-    return res.sendStatus(404);
-  }
+  router.get("/new", async (req, res) => {
+    const token = getRandomToken();
+    const newSudoku = new Sudoku();
+    games[token] = newSudoku;
+    newSudoku.createNewPuzzle();
 
-  const grid = sudoku.getGrid();
+    res.cookie("sudoku_game_id", token, { maxAge: 900000, httpOnly: true });
+    return res.json({ id: token });
+  });
 
-  return res.json({ grid: grid });
-});
+  router.get("/:gameId", (req, res) => {
+    const { gameId } = req.params;
+    const sudoku = games[gameId];
+    if (!sudoku) {
+      return res.sendStatus(404);
+    }
 
-router.put("/:gameId", (req, res) => {
-  const { gameId } = req.params;
-  const { x, y, value } = req.body;
+    const grid = sudoku.getGrid();
 
-  const sudoku = games[gameId];
+    return res.json({ grid: grid });
+  });
 
-  if (!sudoku) {
-    return res.sendStatus(404);
-  }
+  router.put("/:gameId", (req, res) => {
+    const { gameId } = req.params;
+    const { x, y, value } = req.body;
+    io.sockets.emit("new_message", { x, y, value });
 
-  sudoku.move({ x, y, value });
+    const sudoku = games[gameId];
 
-  return res.json({ ok: true });
-});
+    if (!sudoku) {
+      return res.sendStatus(404);
+    }
 
-module.exports = router;
+    sudoku.move({ x, y, value });
+
+    return res.json({ ok: true });
+  });
+
+  return router;
+}
+
+module.exports = myFunc;
