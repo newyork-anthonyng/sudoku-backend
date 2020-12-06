@@ -43,6 +43,7 @@ class Sudoku {
 
   _fetchNewPuzzle = async () => {
     const { data: response } = await axios.get(BASE_URL);
+
     // const response = {
     //   response: true,
     //   size: "9",
@@ -71,7 +72,6 @@ class Sudoku {
     // };
 
     return response.squares;
-    // return response.squares;
   };
 
   move = ({ x, y, value }) => {

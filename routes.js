@@ -18,7 +18,7 @@ function myFunc(io) {
     const token = getRandomToken();
     const newSudoku = new Sudoku();
     games[token] = newSudoku;
-    newSudoku.createNewPuzzle();
+    await newSudoku.createNewPuzzle();
 
     res.cookie("sudoku_game_id", token, { maxAge: 900000, httpOnly: true });
     return res.json({ id: token });
