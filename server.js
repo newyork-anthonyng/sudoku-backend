@@ -11,16 +11,13 @@ const io = require("socket.io")(http, {
 const routes = require("./routes")(io);
 const cors = require("cors");
 
-// io.on("connection", (socket) => {
-//   socket.on("number_select", (data) => {
-//     io.sockets.emit("new_message", data);
-//   });
-// });
-
 app.use(cookieParser());
 app.use(express.json());
 app.use(cors());
 
+app.get("/health", (req, res) => {
+  res.json({ ok: true });
+});
 app.use("/games", routes);
 
 const port = process.env.PORT || 3001;
